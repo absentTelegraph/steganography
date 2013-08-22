@@ -1,6 +1,54 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// is_png
+//
+// 
+bool is_png (FILE * file) {
+    char magic_numbers[] = { 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a };
+    char * buffer;
+    int result;
+
+    // 
+    // read the first 8 bytes
+    //
+    // create the buffer
+    buffer = (char*) malloc(8);
+    // make sure we got the chunk of memory
+    if (buffer == NULL)
+    {
+        return false;
+    }
+    // seek to the beginning
+    fseek(file, 0, SEEK_SET);
+    // read
+    result = fread(buffer, 1, 8, file);
+    // error check the read
+    if (result != 8)
+    {
+        free(buffer);
+        return false;
+    }
+
+    // 
+    // check that beginning of the file matches the magic numbers
+    //
+    // loop through the first 8 bytes and compare them the the magic numbers
+    for (int i = 0; i < 8; i++)
+    {
+        // if they do not match, return false
+        if (buffer[i] != magic_numbers[i]) 
+        {
+            free(buffer);
+            return false;
+        }
+    }
+    // if we got here, then they all match and return true
+    free(buffer);
+    return true;
+}
+
+
 main (int argc, char *argv[])
 {
     // make sure the usage is correct
@@ -28,38 +76,36 @@ main (int argc, char *argv[])
     // seek back to the beginning
     fseek(file, 0, SEEK_SET);
 
-    // see if it is a PNG
-    char magic_numbers[] = { 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a };
-    char * buffer = (char*) malloc(8);
-    bool is_png = true;
-    // read the first 8 bytes
-    int result = fread(buffer, 1, 8, file);
-    // make sure we were able to read
-    if (result != 8)
+    // see if its a PNG
+    if (is_png(file))
     {
-        printf( "Could not read file.\n" );
-        return -1;
-    }
-    // loop through the first 8 bytes and compare them the the magic numbers
-    for (int i = 0; i < 8; i++)
-    {
-        if (buffer[i] != magic_numbers[i]) 
-        {
-            is_png = false;
-            break;
-        }
-    }
-
-    // compare the first 8 bytes to the magic numbers
-    if (is_png)
-    {
-        printf("This is a PNG.\n");
+        printf("This is a PNG!\n");
     }
     else
     {
         printf("This NOT is a PNG.\n");
+        fclose(file);
+        return -1;
     }
+
+    // go to the sart of the first chunk
+    fseek(file, 8, SEEK_SET);
+    char* buffer = (char*) malloc(4);
+    int results = fread(buffer, 1, 4, file);
+    printf("%hhx\n", buffer[0]);
+    printf("%hhx\n", buffer[1]);
+    printf("%hhx\n", buffer[2]);
+    printf("%hhx\n", buffer[3]);
+    printf("Chunk length: %i\n", *(int*)(buffer));
+    results = fread(buffer, 1, 4, file);
+    printf("Chunk type: %s\n", buffer);
+    free(buffer);
+
+    int test;
+    printf("%lu\n", sizeof(test));
 
     // close the file
     fclose(file);
+
+    return 1;
 }
