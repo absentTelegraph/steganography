@@ -128,7 +128,6 @@ main (int argc, char *argv[])
     // lets try to jam map into a clas
     png = (PNG *)(map);
 
-    offset = 8;
     cur_chunk = &png->chunk_IHDR;
     do
     {
