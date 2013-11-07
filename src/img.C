@@ -55,20 +55,7 @@ PNG_Chunk *PNG_Chunk::get_next_chunk () {
 // check that beginning of the file matches the PNG magic numbers
 bool is_png (char *map) {
     char magic_numbers[] = { 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a };
-    int i;
-
-    // loop through the first 8 bytes and compare them the the magic numbers
-    for (i = 0; i < 8; i++)
-    {
-        // if they do not match, return false
-        if (map[i] != magic_numbers[i]) 
-        {
-            return false;
-        }
-    }
-
-    // if we got here, then they all match and return true
-    return true;
+    return memcmp(map, magic_numbers, 8) == 0;
 }
 
 
